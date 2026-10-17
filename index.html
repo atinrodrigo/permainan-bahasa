@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GerakPintar — Kisah Harimau yang Jahat</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    :root {
+      --indigo: #4338ca;
+      --emerald: #059669;
+      --rose: #e11d48;
+      --slate: #1e293b;
+    }
+
+    body {
+      margin: 0;
+      color: var(--slate);
+      font-family: "Nunito", sans-serif;
+      background: linear-gradient(135deg, #a7f3d0, #c7d2fe 50%, #fbcfe8);
+      background-attachment: fixed;
+      min-height: 100vh;
+    }
+
+    h1, h2, h3, button, .heading {
+      font-family: "Fredoka", sans-serif;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    button:focus-visible, input:focus-visible {
+      outline: 4px solid #fbbf24;
+      outline-offset: 4px;
+    }
+
+    [hidden] { display: none !important; }
+
+    .screen {
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 32px 18px 90px;
+    }
+
+    .center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .glass {
+      background: rgba(255,255,255,.88);
+      border: 2px solid rgba(255,255,255,.75);
+      border-radius: 30px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 20px 65px #312e8120;
+    }
+
+    .intro {
+      width: min(100%, 740px);
+      padding: clamp(24px, 5vw, 48px);
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 7px 15px;
+      font-weight: 800;
+      font-size: 14px;
+      color: var(--indigo);
+      background: #e0e7ff;
+    }
+
+    h1 {
+      margin: 12px 0;
+      font-size: clamp(42px, 8vw, 76px);
+      line-height: 1.1;
+      font-weight: 700;
+      color: var(--indigo);
+    }
+
+    .subtitle {
+      margin: 12px 0 24px;
+      font-size: clamp(22px, 4vw, 30px);
+    }
+
+    .name-label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 800;
+      font-size: 21px;
+    }
+
+    input {
+      width: min(100%, 420px);
+      border: 2px solid #a5b4fc;
+      border-radius: 18px;
+      background: white;
+      padding: 16px;
+      text-align: center;
+      font-size: 22px;
+      color: var(--slate);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 18px;
+      padding: 15px 22px;
+      font-family: "Fredoka", sans-serif;
+      font-size: 19px;
+      font-weight: 600;
+      transition: transform .15s ease;
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+    .primary { background: #4f46e5; color: white; }
+    .secondary { background: #e0e7ff; color: #3730a3; }
+    .green { background: #059669; color: white; }
+
+    .instructions {
+      margin-top: 26px;
+      padding: 20px;
+      background: #ffffff99;
+      border-radius: 20px;
+      line-height: 1.7;
+    }
+
+    .instructions p { margin: 6px 0; }
+    .small { font-size: 13px; line-height: 1.6; color: #64748b; }
+    .error { color: #be123c; font-weight: 800; }
+
+    #sound {
+      position: fixed;
+      bottom: 14px;
+      right: 14px;
+      z-index: 90;
+      border: 2px solid white;
+      border-radius: 999px;
+      padding: 10px 16px;
+      background: #fff;
+      color: #4338ca;
+      font-weight: 800;
+      box-shadow: 0 5px 20px #0002;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      overflow-y: auto;
+      padding: 24px;
+      background: #0f172acc;
+      display: grid;
+      place-items: center;
+    }
+
+    .modal-card {
+      width: min(100%, 760px);
+      max-height: 88dvh;
+      overflow-y: auto;
+      padding: clamp(22px, 4vw, 38px);
+      background: #fff;
+      border-radius: 28px;
+    }
+
+    .story-copy {
+      font-size: 21px;
+      line-height: 1.8;
+    }
+
+    .story-copy p { margin: 0 0 20px; }
+
+    #game {
+      position: fixed;
+      inset: 0;
+      padding: 0;
+      background: #0f172a;
+      overflow: hidden;
+    }
+
+    #camera {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+
+    .camera-shade {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(#0f172a88, transparent 55%, #0f172a66);
+      pointer-events: none;
+    }
+
+    .answer-zone {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 50%;
+      border: 0;
+      color: white;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0 12px 115px;
+    }
+
+    #answer-true {
+      left: 0;
+      background: #10b98125;
+      border-right: 2px dashed #ffffff55;
+    }
+
+    #answer-false {
+      right: 0;
+      background: #f43f5e25;
+    }
+
+    #answer-true:hover { background: #10b98145; }
+    #answer-false:hover { background: #f43f5e45; }
+
+    .answer-label {
+      padding: 18px 28px;
+      border: 2px solid #ffffff99;
+      border-radius: 24px;
+      font-family: "Fredoka", sans-serif;
+      font-size: clamp(24px, 5vw, 44px);
+      font-weight: 600;
+      box-shadow: 0 12px 25px #0003;
+    }
+
+    #answer-true .answer-label { background: #047857e8; }
+    #answer-false .answer-label { background: #be123ce8; }
+
+    .hud {
+      position: absolute;
+      z-index: 5;
+      top: 18px;
+      left: 18px;
+      right: 18px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .greeting {
+      background: #fffffff2;
+      border-radius: 20px;
+      padding: 12px 18px;
+      max-width: calc(100% - 88px);
+      overflow-wrap: anywhere;
+    }
+
+    #greeting {
+      margin: 0;
+      color: var(--indigo);
+      font-weight: 800;
+      font-size: clamp(17px, 3vw, 25px);
+    }
+
+    #counter { font-size: 14px; margin: 4px 0 0; }
+
+    #timer {
+      width: 74px;
+      height: 74px;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      border: 5px solid #c7d2fe;
+      background: white;
+      color: var(--indigo);
+      font-family: "Fredoka", sans-serif;
+      font-size: 33px;
+      font-weight: 600;
+    }
+
+    .question-wrap {
+      position: absolute;
+      z-index: 5;
+      top: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(90%, 900px);
+      pointer-events: none;
+      text-align: center;
+    }
+
+    .question-card {
+      padding: clamp(18px, 3vw, 32px);
+      border: 2px solid #ffffff55;
+      background: #0f172aeb;
+      border-radius: 26px;
+      color: white;
+    }
+
+    #question {
+      font-size: clamp(23px, 4vw, 42px);
+      line-height: 1.35;
+      margin: 14px 0 0;
+      font-weight: 600;
+      text-shadow: 0 2px 3px #0008;
+    }
+
+    #status {
+      margin-top: 12px;
+      display: inline-block;
+      padding: 9px 16px;
+      border-radius: 15px;
+      background: #fef3c7;
+      color: #78350f;
+      font-weight: 800;
+      font-size: 15px;
+    }
+
+    #face-dot {
+      position: absolute;
+      z-index: 6;
+      pointer-events: none;
+      width: 22px;
+      height: 22px;
+      border: 3px solid white;
+      border-radius: 50%;
+      background: #facc15;
+      box-shadow: 0 0 20px #facc15;
+      transform: translate(-50%, -50%);
+    }
+
+    .hold-track {
+      position: absolute;
+      z-index: 7;
+      bottom: 92px;
+      left: 25%;
+      width: 50%;
+      height: 10px;
+      border-radius: 99px;
+      background: #ffffff55;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    #hold-fill {
+      height: 100%;
+      width: 0;
+      background: #facc15;
+      border-radius: inherit;
+    }
+
+    #click-mode {
+      position: absolute;
+      z-index: 8;
+      bottom: 24px;
+      left: 18px;
+      font-size: 14px;
+      padding: 12px 16px;
+    }
+
+    .feedback-card { text-align: center; }
+    #feedback-icon { font-size: 64px; }
+    #feedback-title {
+      font-size: clamp(25px, 5vw, 39px);
+      line-height: 1.3;
+      margin: 14px 0;
+    }
+
+    #feedback-answer {
+      display: inline-block;
+      background: #e0e7ff;
+      color: #3730a3;
+      border-radius: 999px;
+      padding: 10px 18px;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    #feedback-explanation {
+      background: #f1f5f9;
+      border-radius: 18px;
+      padding: 20px;
+      font-size: 22px;
+      line-height: 1.6;
+    }
+
+    .end-wrap { width: min(100%, 900px); margin: auto; }
+    .end-header { text-align: center; padding: 32px; }
+    .end-header h2 { font-size: clamp(28px, 5vw, 42px); color: #4338ca; }
+    .review-section { margin-top: 24px; padding: 24px; }
+    .review-section h2 { font-size: 28px; }
+
+    .review-item {
+      margin: 14px 0;
+      padding: 20px;
+      border: 1px solid #c7d2fe;
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    .review-item h3 { font-size: 20px; margin: 0 0 12px; }
+    .review-item p { margin: 8px 0; line-height: 1.6; }
+    .values { font-size: 20px; line-height: 1.9; padding-left: 24px; }
+
+    @media (max-height: 620px) {
+      .hud { top: 10px; }
+      .greeting { padding: 8px 12px; }
+      #timer { width: 56px; height: 56px; font-size: 26px; }
+      .question-wrap { top: 85px; }
+      .question-card { padding: 12px; }
+      #question { font-size: clamp(20px, 3vw, 28px); margin-top: 8px; }
+      .answer-zone { padding-bottom: 80px; }
+      .answer-label { padding: 10px 20px; font-size: 25px; }
+      .hold-track { bottom: 64px; }
+      #status { margin-top: 7px; font-size: 13px; padding: 6px 10px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <button id="sound" type="button" aria-pressed="true">🔊 Bunyi hidup</button>
+
+  <!-- PAPARAN PERMULAAN -->
+  <main id="setup" class="screen center">
+    <div class="glass intro">
+      <span class="badge">BAHASA MELAYU • TAHUN 1</span>
+      <div style="font-size:64px;margin-top:18px" aria-hidden="true">🌿 🐯 🌿</div>
+      <h1>GerakPintar</h1>
+      <h2 class="subtitle">Kisah Harimau yang Jahat</h2>
+
+      <label class="name-label" for="name">Nama panggilan saya</label>
+      <input id="name" type="text" maxlength="20"
+             placeholder="Contoh: Aina" autocomplete="off">
+      <p id="name-error" class="error" hidden>Isi nama dahulu, ya! 😊</p>
+
+      <div class="actions">
+        <button id="read-story" class="btn secondary" type="button">
+          📖 Jom Baca Cerita
+        </button>
+        <button id="start" class="btn primary" type="button">
+          🚀 Mula Main & Buka Kamera
+        </button>
+      </div>
+
+      <div class="instructions">
+        <p><strong>Gerakkan muka ke kiri skrin → BENAR ✓</strong></p>
+        <p><strong>Gerakkan muka ke kanan skrin → SALAH ✕</strong></p>
+        <p>Tahan sekejap sehingga bar kuning penuh.</p>
+        <p>Kamu juga boleh klik jawapan atau tekan anak panah ← →.</p>
+        <p>🌼 Duduk dengan selesa. Gerakkan kepala sedikit sahaja.</p>
+      </div>
+
+      <p class="small" style="margin-top:18px">
+        Internet diperlukan untuk model muka, font dan pustaka.
+        Imej kamera diproses pada peranti dan tidak dimuat naik oleh permainan.
+        Jika kamera tidak tersedia, gunakan mod klik.
+      </p>
+
+      <p class="small">
+        SK 2.2 • SP 2.2.1<br>
+        Kosa kata • Idea tersurat • Idea tersirat
+      </p>
+    </div>
+  </main>
+
+  <!-- CERITA -->
+  <section id="story-modal" class="modal" role="dialog"
+           aria-modal="true" aria-labelledby="story-title" hidden>
+    <div class="modal-card">
+      <h2 id="story-title" class="subtitle">🐯 Kisah Harimau yang Jahat</h2>
+
+      <div class="story-copy">
+        <p>
+          Di sebuah hutan, tinggal seekor harimau yang jahat dan garang.
+          Harimau suka mengganggu haiwan yang lemah.
+          Semua haiwan takut kepadanya.
+        </p>
+        <p>
+          Pada suatu hari, Harimau meminta semua haiwan memilih raja
+          antara dirinya dengan Kerbau. Haiwan yang tidak dipilih
+          mesti meninggalkan hutan.
+        </p>
+        <p>
+          Semua haiwan memilih Kerbau sebagai raja. Harimau sangat marah.
+          Harimau meninggalkan hutan, tetapi mengancam untuk kembali
+          dan mencederakan semua haiwan.
+        </p>
+        <p>
+          Sang Kancil terdengar ancaman itu. Kancil segera memberitahu
+          haiwan lain supaya berjaga-jaga.
+        </p>
+        <p>
+          Kerbau mencadangkan agar mereka membuat perangkap.
+          Kancil pula mencadangkan sebuah lubang yang besar dan dalam.
+          Semua haiwan bekerjasama menggali lubang itu.
+          Mereka menutupnya dengan ranting dan daun kering.
+        </p>
+        <p>
+          Kancil memancing Harimau supaya mengejarnya ke arah perangkap.
+          Apabila Harimau menerkam, Kancil segera mengelak.
+          Harimau terjatuh ke dalam lubang.
+        </p>
+        <p style="color:#047857;font-weight:800">
+          Akhirnya, Harimau berjaya diperangkap.
+          Haiwan-haiwan di hutan kembali selamat.
+        </p>
+      </div>
+
+      <p class="small">Cerita diringkaskan untuk aktiviti pembelajaran Tahun 1.</p>
+      <button id="close-story" class="btn primary" type="button">Faham! 😊</button>
+    </div>
+  </section>
+
+  <!-- MEMUATKAN KAMERA -->
+  <section id="loading" class="screen center" hidden>
+    <div class="glass intro">
+      <div style="font-size:64px">📷</div>
+      <h2 class="subtitle">Jom bersedia!</h2>
+      <p id="loading-status" role="status">
+        Membuka kamera dan memuatkan pengesanan muka…
+      </p>
+      <div class="actions">
+        <button id="skip-camera" class="btn secondary" type="button">
+          Teruskan dengan Klik
+        </button>
+      </div>
+      <p class="small" style="margin-top:18px">
+        Benarkan kamera jika pelayar meminta izin.
+        Jika akses kamera disekat, permainan masih boleh dimainkan dengan klik.
+      </p>
+    </div>
+  </section>
+
+  <!-- PERMAINAN DAN LATIHAN -->
+  <section id="game" class="screen" hidden>
+    <video id="camera" autoplay muted playsinline></video>
+    <div class="camera-shade"></div>
+
+    <button id="answer-true" class="answer-zone" type="button"
+            aria-label="Jawapan Benar">
+      <span class="answer-label">✓ BENAR</span>
+    </button>
+
+    <button id="answer-false" class="answer-zone" type="button"
+            aria-label="Jawapan Salah">
+      <span class="answer-label">✕ SALAH</span>
+    </button>
+
+    <div class="hud">
+      <div class="greeting">
+        <p id="greeting"></p>
+        <p id="counter"></p>
+      </div>
+      <div id="timer" aria-label="Baki masa">10</div>
+    </div>
+
+    <div class="question-wrap">
+      <div class="question-card">
+        <span id="category" class="badge"></span>
+        <h2 id="question"></h2>
+      </div>
+      <p id="status" role="status"></p>
+    </div>
+
+    <div id="face-dot" hidden></div>
+    <div class="hold-track">
+      <div id="hold-fill"></div>
+    </div>
+
+    <button id="click-mode" class="btn secondary" type="button">
+      Teruskan dengan Klik
+    </button>
+  </section>
+
+  <!-- MAKLUM BALAS -->
+  <section id="feedback" class="modal" role="dialog"
+           aria-modal="true" aria-labelledby="feedback-title" hidden>
+    <div class="modal-card feedback-card">
+      <div id="feedback-icon"></div>
+      <h2 id="feedback-title"></h2>
+      <p id="feedback-answer"></p>
+      <p id="feedback-explanation"></p>
+      <p id="feedback-next" class="small"></p>
+    </div>
+  </section>
+
+  <!-- TAMAT -->
+  <section id="end" class="screen" hidden>
+    <div class="end-wrap">
+      <div class="glass end-header">
+        <div style="font-size:70px">🎉 🐯 🌟</div>
+        <h2 id="end-title"></h2>
+        <p style="font-size:20px">
+          Terima kasih kerana terus mencuba.
+          Setiap cubaan membantu kamu belajar!
+        </p>
+
+        <div class="actions">
+          <button id="again" class="btn green" type="button">🔄 Main Lagi</button>
+          <button id="change-name" class="btn secondary" type="button">
+            👤 Tukar Nama
+          </button>
+        </div>
+      </div>
+
+      <div class="glass review-section">
+        <h2>🌱 Nilai Murni</h2>
+        <ul class="values">
+          <li>Kita bekerjasama.</li>
+          <li>Kita membantu rakan.</li>
+          <li>Kita tidak membuli.</li>
+          <li>Kita berfikir sebelum bertindak.</li>
+        </ul>
+      </div>
+
+      <div class="glass review-section">
+        <h2>📖 Mari Ingat Semula</h2>
+        <div id="review"></div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    "use strict";
+
+    const $ = id => document.getElementById(id);
+
+    const bankSoalan = [
+      {
+        kategori: "Kosa kata",
+        soal: "Garang bermaksud lemah lembut.",
+        jawapan: "Salah",
+        penjelasan: "Garang bermaksud bengis atau ganas, bukan lemah lembut."
+      },
+      {
+        kategori: "Kosa kata",
+        soal: "Mengelak bermaksud menjauhkan diri supaya tidak terkena sesuatu.",
+        jawapan: "Benar",
+        penjelasan: "Kancil mengelak supaya tidak terkena terkaman Harimau."
+      },
+      {
+        kategori: "Kosa kata",
+        soal: "Bekerjasama bermaksud membuat kerja seorang diri.",
+        jawapan: "Salah",
+        penjelasan: "Bekerjasama bermaksud melakukan kerja bersama-sama."
+      },
+      {
+        kategori: "Idea tersurat",
+        soal: "Semua haiwan memilih Kerbau sebagai raja.",
+        jawapan: "Benar",
+        penjelasan: "Dalam cerita, semua haiwan memilih Kerbau sebagai raja."
+      },
+      {
+        kategori: "Idea tersurat",
+        soal: "Harimau membantu haiwan lain menggali lubang.",
+        jawapan: "Salah",
+        penjelasan: "Haiwan-haiwan lain menggali lubang untuk memerangkap Harimau."
+      },
+      {
+        kategori: "Idea tersurat",
+        soal: "Kancil memberitahu haiwan lain tentang ancaman Harimau.",
+        jawapan: "Benar",
+        penjelasan: "Selepas mendengar ancaman Harimau, Kancil segera memberitahu haiwan lain."
+      },
+      {
+        kategori: "Idea tersurat",
+        soal: "Kerbau mencadangkan supaya mereka membuat perangkap.",
+        jawapan: "Benar",
+        penjelasan: "Kerbau mencadangkan perangkap. Kancil pula mencadangkan lubang yang besar dan dalam."
+      },
+      {
+        kategori: "Idea tersirat",
+        soal: "Tindakan Kancil menunjukkan bahawa dia bijak.",
+        jawapan: "Benar",
+        penjelasan: "Kancil membawa Harimau ke arah perangkap. Daripada tindakannya, kita dapat memahami bahawa Kancil bijak."
+      },
+      {
+        kategori: "Idea tersirat",
+        soal: "Kita patut mencontohi sikap Harimau yang suka membuli.",
+        jawapan: "Salah",
+        penjelasan: "Sikap Harimau membuat haiwan lain takut. Pengajarannya, kita tidak patut membuli."
+      },
+      {
+        kategori: "Idea tersirat",
+        soal: "Kancil memerangkap Harimau kerana Kancil lebih kuat.",
+        jawapan: "Salah",
+        penjelasan: "Daripada rancangan Kancil, kita memahami bahawa dia menggunakan kebijaksanaan, bukan kekuatan."
+      }
+    ];
+
+    const pujian = [
+      "Bagus, {nama}! Kamu faham cerita ini! 🌟",
+      "Tepat sekali, {nama}! 👏",
+      "Syabas, {nama}! Usaha kamu sangat baik! 🎉",
+      "Hebat, {nama}! Teruskan membaca dengan teliti! ✨",
+      "Betul, {nama}! Kamu berjaya memahami ayat ini! 🐯"
+    ];
+
+    const semangat = [
+      "Tak mengapa, {nama}. Jom belajar bersama! 💛",
+      "Bagus kerana mencuba, {nama}! 🌱",
+      "Teruskan usaha, {nama}. Kamu sedang belajar! 💪",
+      "Jangan risau, {nama}. Mari baca penerangan ini. 📖",
+      "Cuba lagi selepas ini, {nama}. Kamu boleh! 🌈"
+    ];
+
+    const state = {
+      nama: "",
+      phase: "setup",
+      questions: [],
+      index: 0,
+      remaining: 10000,
+      feedbackRemaining: 5000,
+      waitingCenter: false,
+      faceEnabled: false,
+      smoothX: null,
+      holdZone: null,
+      holdStart: 0,
+      practiceStep: 0,
+      sound: true,
+      lastPraise: -1,
+      lastEncouragement: -1
+    };
+
+    let audioContext = null;
+    let stream = null;
+    let detector = null;
+    let detectorPromise = null;
+    let session = 0;
+    let animation = 0;
+    let lastFrame = 0;
+    let lastVideoTime = -1;
+    let lastDetectionTime = 0;
+    let lastSeenTime = 0;
+
+    const video = $("camera");
+    const HOLD_MS = 800;
+
+    function showScreen(id) {
+      ["setup", "loading", "game", "end"].forEach(name => {
+        $(name).hidden = name !== id;
+      });
+    }
+
+    function resetHold() {
+      state.holdZone = null;
+      state.holdStart = 0;
+      $("hold-fill").style.width = "0%";
+    }
+
+    function initAudio() {
+      try {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioClass) return;
+        if (!audioContext) audioContext = new AudioClass();
+        if (audioContext.state === "suspended") {
+          audioContext.resume().catch(() => {});
+        }
+      } catch (error) {
+        console.warn("Audio tidak tersedia:", error);
+      }
+    }
+
+    function tone(type) {
+      if (!state.sound || !audioContext ||
+          audioContext.state !== "running") return;
+
+      const notes = {
+        tick: [720],
+        correct: [523, 659, 784],
+        wrong: [330, 294],
+        end: [523, 659, 784, 1047]
+      };
+
+      const frequencies = notes[type] || notes.tick;
+      const step = type === "tick" ? 0.07 : 0.15;
+
+      frequencies.forEach((frequency, index) => {
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        const start = audioContext.currentTime + index * step;
+        const duration = type === "tick" ? 0.065 : 0.22;
+
+        oscillator.type = type === "correct" || type === "end"
+          ? "triangle" : "sine";
+
+        oscillator.frequency.setValueAtTime(frequency, start);
+        gain.gain.setValueAtTime(0, start);
+        gain.gain.linearRampToValueAtTime(
+          type === "tick" ? 0.035 : 0.10, start + 0.015
+        );
+        gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
+        oscillator.start(start);
+        oscillator.stop(start + duration + 0.02);
+        oscillator.onended = () => {
+          oscillator.disconnect();
+          gain.disconnect();
+        };
+      });
+    }
+
+    function celebrate(big = false) {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      if (typeof window.confetti !== "function") return;
+
+      window.confetti({
+        particleCount: big ? 180 : 75,
+        spread: big ? 100 : 65,
+        origin: { y: 0.65 },
+        colors: ["#34d399", "#818cf8", "#fb7185", "#fbbf24"],
+        zIndex: 100
+      });
+    }
+
+    function personalized(correct) {
+      const list = correct ? pujian : semangat;
+      const key = correct ? "lastPraise" : "lastEncouragement";
+      let index;
+
+      do {
+        index = Math.floor(Math.random() * list.length);
+      } while (list.length > 1 && index === state[key]);
+
+      state[key] = index;
+      return list[index].replace("{nama}", state.nama);
+    }
+
+    function stopCamera() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+      }
+
+      video.srcObject = null;
+      $("face-dot").hidden = true;
+      state.faceEnabled = false;
+      lastVideoTime = -1;
+      resetHold();
+    }
+
+    function stopLoop() {
+      cancelAnimationFrame(animation);
+      animation = 0;
+    }
+
+    async function loadDetector() {
+      if (detector) return detector;
+      if (detectorPromise) return detectorPromise;
+
+      detectorPromise = (async () => {
+        // Pin JS and WASM to the same MediaPipe version.
+        const vision = await import(
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs"
+        );
+
+        const fileset = await vision.FilesetResolver.forVisionTasks(
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+        );
+
+        detector = await vision.FaceLandmarker.createFromOptions(fileset, {
+          baseOptions: {
+            modelAssetPath:
+              "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+            delegate: "CPU"
+          },
+          runningMode: "VIDEO",
+          numFaces: 2,
+          outputFaceBlendshapes: false,
+          outputFacialTransformationMatrixes: false
+        });
+
+        return detector;
+      })();
+
+      try {
+        return await detectorPromise;
+      } finally {
+        detectorPromise = null;
+      }
+    }
+
+    async function beginSession() {
+      const token = ++session;
+
+      stopLoop();
+      stopCamera();
+      $("feedback").hidden = true;
+      state.phase = "loading";
+      showScreen("loading");
+      initAudio();
+
+      $("loading-status").textContent =
+        "Membuka kamera dan memuatkan pengesanan muka…";
+
+      try {
+        if (!navigator.mediaDevices?.getUserMedia) {
+          throw new Error("Pelayar ini tidak menyediakan akses kamera.");
+        }
+
+        const acquired = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            frameRate: { ideal: 60 },
+            facingMode: "user"
+          },
+          audio: false
+        });
+
+        if (token !== session) {
+          acquired.getTracks().forEach(track => track.stop());
+          return;
+        }
+
+        stream = acquired;
+        video.srcObject = stream;
+        await video.play();
+
+        if (token !== session) return;
+
+        $("loading-status").textContent =
+          "Kamera sudah dibuka. Memuatkan model muka…";
+
+        await loadDetector();
+
+        if (token !== session) return;
+
+        state.faceEnabled = true;
+        startPractice();
+      } catch (error) {
+        if (token !== session) return;
+
+        console.error("Kamera / model muka:", error);
+        stopCamera();
+
+        $("loading-status").textContent =
+          "Kamera atau model muka tidak dapat dibuka. " +
+          "Semak izin kamera dan internet, atau tekan “Teruskan dengan Klik”.";
+      }
+    }
+
+    function startLoop() {
+      stopLoop();
+      lastFrame = performance.now();
+      lastDetectionTime = 0;
+      lastSeenTime = 0;
+      lastVideoTime = -1;
+      animation = requestAnimationFrame(loop);
+    }
+
+    function startPractice() {
+      state.phase = "practice";
+      state.practiceStep = 0;
+      state.waitingCenter = true;
+      state.smoothX = null;
+
+      showScreen("game");
+      $("greeting").textContent = `Hai, ${state.nama}! Jom berlatih 😊`;
+      $("counter").textContent = "Latihan tanpa pemasa";
+      $("timer").textContent = "🌟";
+      $("category").textContent = "Latihan gerakan muka";
+      $("question").textContent = "Gerakkan muka ke kiri untuk pilih BENAR.";
+      $("status").textContent = "Pandang ke tengah dahulu 😊";
+      $("click-mode").hidden = false;
+
+      resetHold();
+      startLoop();
+    }
+
+    function startQuestions() {
+      state.questions = bankSoalan.map(question => ({ ...question }));
+
+      for (let i = state.questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [state.questions[i], state.questions[j]] =
+          [state.questions[j], state.questions[i]];
+      }
+
+      state.index = 0;
+      state.smoothX = null;
+      $("feedback").hidden = true;
+      showScreen("game");
+      loadQuestion();
+      startLoop();
+    }
+
+    function loadQuestion() {
+      if (state.index >= state.questions.length) {
+        finishGame();
+        return;
+      }
+
+      const question = state.questions[state.index];
+      state.phase = "question";
+      state.remaining = 10000;
+      state.waitingCenter = state.faceEnabled;
+
+      resetHold();
+
+      $("greeting").textContent = `Jom cuba, ${state.nama}! 🌟`;
+      $("counter").textContent =
+        `Soalan ${state.index + 1} daripada ${state.questions.length}`;
+      $("category").textContent = question.kategori;
+      $("question").textContent = question.soal;
+      $("timer").textContent = "10";
+      $("timer").style.color = "#4338ca";
+      $("status").textContent = state.faceEnabled
+        ? "Pandang ke tengah dahulu. Pemasa belum bermula 😊"
+        : "Klik jawapan atau tekan anak panah ← →";
+      $("click-mode").hidden = !state.faceEnabled;
+    }
+
+    function answer(value) {
+      if (document.hidden) return;
+
+      if (state.phase === "practice") {
+        const expected = state.practiceStep === 0 ? "Benar" : "Salah";
+
+        if (value !== expected) {
+          resetHold();
+          $("status").textContent = state.practiceStep === 0
+            ? "Cuba bahagian kiri dahulu 😊"
+            : "Sekarang cuba bahagian kanan 😊";
+          return;
+        }
+
+        tone("correct");
+        resetHold();
+
+        if (state.practiceStep === 0) {
+          state.practiceStep = 1;
+          state.waitingCenter = true;
+          $("question").textContent =
+            "Bagus! Sekarang gerakkan muka ke kanan untuk pilih SALAH.";
+          $("status").textContent = "Kembali ke tengah dahulu 😊";
+        } else {
+          startQuestions();
+        }
+
+        return;
+      }
+
+      if (state.phase !== "question") return;
+
+      // Lock immediately to prevent duplicate answers.
+      state.phase = "feedback";
+      state.feedbackRemaining = 5000;
+      resetHold();
+
+      const question = state.questions[state.index];
+      const timedOut = value === null;
+      const correct = value === question.jawapan;
+
+      question.userAnswer = value;
+      question.correct = correct;
+      question.timedOut = timedOut;
+
+      $("feedback-icon").textContent =
+        timedOut ? "⏱️" : correct ? "🌟" : "💛";
+
+      $("feedback-title").textContent = timedOut
+        ? `Masa sudah tamat, ${state.nama}. Tak mengapa, jom belajar! 😊`
+        : personalized(correct);
+
+      $("feedback-title").style.color =
+        correct ? "#047857" : "#4338ca";
+
+      $("feedback-answer").textContent =
+        `Jawapan sebenar: ${question.jawapan}`;
+
+      $("feedback-explanation").textContent = question.penjelasan;
+      $("feedback-next").textContent = state.index === state.questions.length - 1
+        ? "Ulang kaji akan dibuka dalam 5 saat…"
+        : "Soalan seterusnya dalam 5 saat…";
+
+      $("feedback").hidden = false;
+
+      if (correct) {
+        tone("correct");
+        celebrate();
+      } else if (!timedOut) {
+        tone("wrong");
+      }
+    }
+
+    function processFace(timestamp) {
+      if (!state.faceEnabled || !detector || !stream) return;
+      if (!["practice", "question"].includes(state.phase)) return;
+      if (video.readyState < 2) return;
+      if (timestamp - lastDetectionTime < 65) return;
+
+      if (video.currentTime === lastVideoTime) {
+        if (timestamp - lastSeenTime > 300) {
+          resetHold();
+          $("face-dot").hidden = true;
+          $("status").textContent = "Menunggu kamera… Kamu juga boleh klik.";
+        }
+        return;
+      }
+
+      lastDetectionTime = timestamp;
+      lastVideoTime = video.currentTime;
+
+      const result = detector.detectForVideo(video, timestamp);
+      const faces = result.faceLandmarks || [];
+
+      if (faces.length !== 1) {
+        resetHold();
+        state.smoothX = null;
+        $("face-dot").hidden = true;
+        $("status").textContent = faces.length > 1
+          ? "Seorang pemain dahulu, ya 😊"
+          : "Pastikan muka kamu kelihatan dalam kamera 😊";
+        return;
+      }
+
+      lastSeenTime = timestamp;
+
+      const nose = faces[0][1];
+      const rect = video.getBoundingClientRect();
+
+      if (!rect.width || !rect.height ||
+          !video.videoWidth || !video.videoHeight) return;
+
+      // Map the mirrored video, including object-fit: cover cropping.
+      const scale = Math.max(
+        rect.width / video.videoWidth,
+        rect.height / video.videoHeight
+      );
+
+      const drawnWidth = video.videoWidth * scale;
+      const drawnHeight = video.videoHeight * scale;
+
+      const x = (
+        (1 - nose.x) * drawnWidth - (drawnWidth - rect.width) / 2
+      ) / rect.width;
+
+      const y = (
+        nose.y * drawnHeight - (drawnHeight - rect.height) / 2
+      ) / rect.height;
+
+      state.smoothX = state.smoothX === null
+        ? x
+        : state.smoothX * 0.55 + x * 0.45;
+
+      $("face-dot").style.left = `${state.smoothX * 100}%`;
+      $("face-dot").style.top = `${y * 100}%`;
+      $("face-dot").hidden = false;
+
+      if (state.waitingCenter) {
+        resetHold();
+
+        if (state.smoothX >= 0.4 && state.smoothX <= 0.6) {
+          state.waitingCenter = false;
+          lastFrame = timestamp;
+          $("status").textContent = "Bagus! Pilih kiri atau kanan 😊";
+        } else {
+          $("status").textContent = "Pandang ke tengah dahulu 😊";
+        }
+
+        return;
+      }
+
+      const zone = state.smoothX < 0.35
+        ? "Benar"
+        : state.smoothX > 0.65
+          ? "Salah"
+          : null;
+
+      if (!zone) {
+        resetHold();
+        $("status").textContent = "Kiri: Benar ✓   |   Kanan: Salah ✕";
+        return;
+      }
+
+      if (zone !== state.holdZone) {
+        state.holdZone = zone;
+        state.holdStart = timestamp;
+      }
+
+      const progress = Math.min(1, (timestamp - state.holdStart) / HOLD_MS);
+      $("hold-fill").style.width = `${progress * 100}%`;
+      $("status").textContent = `Tahan sekejap untuk pilih ${zone}…`;
+
+      if (progress >= 1) answer(zone);
+    }
+
+    function loop(timestamp) {
+      if (!["practice", "question", "feedback"].includes(state.phase)) return;
+
+      let elapsed = Math.max(0, timestamp - lastFrame);
+      lastFrame = timestamp;
+
+      if (!document.hidden) {
+        const previousPhase = state.phase;
+        const wasWaiting = state.waitingCenter;
+
+        try {
+          processFace(timestamp);
+        } catch (error) {
+          console.error("Pengesanan muka terganggu:", error);
+          state.faceEnabled = false;
+          state.waitingCenter = false;
+          $("face-dot").hidden = true;
+          resetHold();
+
+          if (state.phase === "practice") {
+            startQuestions();
+            return;
+          }
+
+          $("status").textContent =
+            "Pengesanan terganggu. Gunakan klik atau anak panah 😊";
+        }
+
+        if (state.phase === previousPhase) {
+          if (state.phase === "question" && !state.waitingCenter) {
+            if (wasWaiting) elapsed = 0;
+
+            const before = Math.ceil(state.remaining / 1000);
+            state.remaining = Math.max(0, state.remaining - elapsed);
+            const after = Math.ceil(state.remaining / 1000);
+
+            $("timer").textContent = after;
+            $("timer").style.color = after <= 3 ? "#e11d48" : "#4338ca";
+
+            if (after !== before && after > 0) tone("tick");
+            if (state.remaining === 0) answer(null);
+          } else if (state.phase === "feedback") {
+            state.feedbackRemaining = Math.max(
+              0, state.feedbackRemaining - elapsed
+            );
+
+            const seconds = Math.ceil(state.feedbackRemaining / 1000);
+            $("feedback-next").textContent =
+              state.index === state.questions.length - 1
+                ? `Ulang kaji akan dibuka dalam ${seconds} saat…`
+                : `Soalan seterusnya dalam ${seconds} saat…`;
+
+            if (state.feedbackRemaining === 0) {
+              $("feedback").hidden = true;
+              state.index++;
+              loadQuestion();
+            }
+          }
+        }
+      }
+
+      if (["practice", "question", "feedback"].includes(state.phase)) {
+        animation = requestAnimationFrame(loop);
+      }
+    }
+
+    function finishGame() {
+      state.phase = "end";
+      stopLoop();
+      stopCamera();
+      $("feedback").hidden = true;
+
+      $("end-title").textContent =
+        `Tahniah, ${state.nama}! Kamu sudah selesai belajar! 🎉`;
+
+      const review = $("review");
+      review.replaceChildren();
+
+      state.questions.forEach((question, index) => {
+        const item = document.createElement("article");
+        item.className = "review-item";
+
+        const heading = document.createElement("h3");
+        heading.textContent = `${index + 1}. ${question.soal}`;
+
+        const category = document.createElement("p");
+        category.className = "small";
+        category.textContent = question.kategori;
+
+        const correctAnswer = document.createElement("p");
+        correctAnswer.style.fontWeight = "800";
+        correctAnswer.style.color =
+          question.jawapan === "Benar" ? "#047857" : "#be123c";
+        correctAnswer.textContent = `Jawapan sebenar: ${question.jawapan}`;
+
+        const explanation = document.createElement("p");
+        explanation.textContent = question.penjelasan;
+
+        item.append(heading, category, correctAnswer, explanation);
+        review.appendChild(item);
+      });
+
+      showScreen("end");
+      window.scrollTo(0, 0);
+      tone("end");
+      celebrate(true);
+    }
+
+    function useClickMode() {
+      ++session;
+      stopCamera();
+      state.waitingCenter = false;
+
+      if (state.phase === "loading" || state.phase === "practice") {
+        startQuestions();
+      } else if (state.phase === "question" || state.phase === "feedback") {
+        $("click-mode").hidden = true;
+        $("status").textContent = "Klik jawapan atau tekan anak panah ← →";
+        lastFrame = performance.now();
+      }
+    }
+
+    $("start").addEventListener("click", () => {
+      const name = $("name").value.trim().slice(0, 20);
+
+      if (!name) {
+        $("name-error").hidden = false;
+        $("name").focus();
+        return;
+      }
+
+      $("name-error").hidden = true;
+      state.nama = name;
+      beginSession();
+    });
+
+    $("name").addEventListener("keydown", event => {
+      if (event.key === "Enter") $("start").click();
+    });
+
+    $("read-story").addEventListener("click", () => {
+      $("story-modal").hidden = false;
+      $("close-story").focus();
+    });
+
+    function closeStory() {
+      $("story-modal").hidden = true;
+      $("read-story").focus();
+    }
+
+    $("close-story").addEventListener("click", closeStory);
+
+    $("skip-camera").addEventListener("click", useClickMode);
+    $("click-mode").addEventListener("click", useClickMode);
+
+    $("answer-true").addEventListener("click", () => answer("Benar"));
+    $("answer-false").addEventListener("click", () => answer("Salah"));
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && !$("story-modal").hidden) {
+        closeStory();
+        return;
+      }
+
+      if (event.repeat || document.hidden) return;
+      if (!["practice", "question"].includes(state.phase)) return;
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        answer("Benar");
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        answer("Salah");
+      }
+    });
+
+    $("sound").addEventListener("click", () => {
+      state.sound = !state.sound;
+      $("sound").textContent = state.sound ? "🔊 Bunyi hidup" : "🔇 Senyap";
+      $("sound").setAttribute("aria-pressed", String(state.sound));
+      if (state.sound) initAudio();
+    });
+
+    $("again").addEventListener("click", beginSession);
+
+    $("change-name").addEventListener("click", () => {
+      ++session;
+      stopLoop();
+      stopCamera();
+      state.phase = "setup";
+      $("name").value = "";
+      showScreen("setup");
+      $("name").focus();
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      resetHold();
+      lastFrame = performance.now();
+
+      if (document.hidden) {
+        if (audioContext?.state === "running") {
+          audioContext.suspend().catch(() => {});
+        }
+      } else {
+        if (state.sound && audioContext?.state === "suspended") {
+          audioContext.resume().catch(() => {});
+        }
+      }
+    });
+
+    window.addEventListener("pagehide", () => {
+      ++session;
+      stopLoop();
+      stopCamera();
+      state.phase = "setup";
+      $("feedback").hidden = true;
+      showScreen("setup");
+    });
+
+    showScreen("setup");
+  </script>
+</body>
+</html>
